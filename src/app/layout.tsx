@@ -1,5 +1,4 @@
 "use client";
-import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { TopBar } from "../components/TopBar";
@@ -16,11 +15,6 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
-
-export const metadata: Metadata = {
-  title: "AlChemist Voice Changer",
-  description: "Transform your voice with AI alchemy and stunning visuals.",
-};
 
 export default function RootLayout({
   children,
