@@ -26,7 +26,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}> 
-      <body className="relative min-h-screen bg-gradient-to-br from-[#181c2b] via-[#232946] to-[#3e497a] dark:from-[#10121a] dark:via-[#181c2b] dark:to-[#232946]">
+      <body className="relative min-h-screen bg-gradient-to-br from-[#2d0036] via-[#6a1bc2] to-[#fc5c7d] text-white font-sans">
         <BackgroundWave />
         <TopBar />
         <div className="relative z-10">

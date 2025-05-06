@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, createContext, useContext } from "react";
 import { supabase } from "../lib/supabaseClient";
 import AuthForm from "./auth";
 import type { Session } from '@supabase/supabase-js';
@@ -15,6 +15,9 @@ interface UsageHistory {
   created_at: string;
 }
 
+// Context for history modal
+export const HistoryModalContext = createContext<{open: boolean, setOpen: (v: boolean) => void}>({open: false, setOpen: () => {}});
+
 export default function Home() {
   const [session, setSession] = useState<Session | null>(null);
   const [input, setInput] = useState("");
@@ -25,6 +28,7 @@ export default function Home() {
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [history, setHistory] = useState<UsageHistory[]>([]);
   const [success, setSuccess] = useState<string | null>(null);
+  const [historyModalOpen, setHistoryModalOpen] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSession(data.session));
@@ -121,7 +125,7 @@ export default function Home() {
   }
 
   return (
-    <>
+    <HistoryModalContext.Provider value={{open: historyModalOpen, setOpen: setHistoryModalOpen}}>
       <a href="#main-content" className="sr-only focus:not-sr-only absolute top-2 left-2 bg-blue-600 text-white px-4 py-2 rounded z-50">Skip to main content</a>
       <main id="main-content" className="flex flex-col items-center justify-center min-h-[80vh] w-full px-2 sm:px-4">
         {/* Centered Card */}
@@ -164,29 +168,34 @@ export default function Home() {
             {processing ? "Converting..." : "Convert"}
           </button>
         </section>
-        {/* Results/History Area */}
-        <section className="w-full max-w-xl mt-10 animate-fade-in">
-          <h2 className="text-2xl font-bold mb-4 text-white/90 dark:text-white/80 tracking-tight">History</h2>
-          {audioUrl && (
-            <div className="mb-6 flex flex-col items-center">
-              <audio controls src={audioUrl} className="w-full" />
-              <div className="text-xs text-gray-300 mt-2">Most recent result</div>
-            </div>
-          )}
-          <div className="flex flex-col gap-4">
-            {history.length === 0 && (
-              <div className="bg-white/20 dark:bg-zinc-800/40 rounded-xl p-4 text-gray-200 dark:text-gray-300 shadow-inner">No history yet.</div>
-            )}
-            {history.map((item, idx) => (
-              <div key={item.id || idx} className="bg-white/20 dark:bg-zinc-800/40 rounded-xl p-4 text-gray-200 dark:text-gray-300 shadow-inner">
-                <div className="font-semibold text-lg">{item.text}</div>
-                <div className="text-xs mt-1">Voice: {item.voice_id} | {item.chars_used} chars</div>
-                <div className="text-xs text-gray-400">{new Date(item.created_at).toLocaleString()}</div>
+        {/* History Modal */}
+        {historyModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur" onClick={() => setHistoryModalOpen(false)}>
+            <div className="bg-gradient-to-br from-[#2d0036] via-[#6a1bc2] to-[#fc5c7d] rounded-2xl shadow-2xl p-8 max-w-xl w-full relative animate-fade-in" onClick={e => e.stopPropagation()}>
+              <button className="absolute top-4 right-4 text-white bg-purple-700 hover:bg-purple-800 rounded-full p-1 z-10" onClick={() => setHistoryModalOpen(false)} aria-label="Close history">✕</button>
+              <h2 className="text-2xl font-bold mb-4 text-white tracking-tight">History</h2>
+              {audioUrl && (
+                <div className="mb-6 flex flex-col items-center">
+                  <audio controls src={audioUrl} className="w-full" />
+                  <div className="text-xs text-gray-300 mt-2">Most recent result</div>
+                </div>
+              )}
+              <div className="flex flex-col gap-4 max-h-[60vh] overflow-y-auto">
+                {history.length === 0 && (
+                  <div className="bg-white/20 dark:bg-zinc-800/40 rounded-xl p-4 text-gray-200 dark:text-gray-300 shadow-inner">No history yet.</div>
+                )}
+                {history.map((item, idx) => (
+                  <div key={item.id || idx} className="bg-white/20 dark:bg-zinc-800/40 rounded-xl p-4 text-gray-200 dark:text-gray-300 shadow-inner">
+                    <div className="font-semibold text-lg">{item.text}</div>
+                    <div className="text-xs mt-1">Voice: {item.voice_id} | {item.chars_used} chars</div>
+                    <div className="text-xs text-gray-400">{new Date(item.created_at).toLocaleString()}</div>
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
           </div>
-        </section>
+        )}
       </main>
-    </>
+    </HistoryModalContext.Provider>
   );
 }

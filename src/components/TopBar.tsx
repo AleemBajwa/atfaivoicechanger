@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { supabase } from "../lib/supabaseClient";
 import type { Session } from '@supabase/supabase-js';
 import { loadStripe } from '@stripe/stripe-js';
+import { HistoryModalContext } from "../app/page";
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
@@ -12,6 +13,7 @@ export function TopBar() {
   const [credits, setCredits] = useState<number | null>(null);
   const [loadingCredits, setLoadingCredits] = useState(false);
   const [showTopUp, setShowTopUp] = useState(false);
+  const { setOpen } = useContext(HistoryModalContext);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSession(data.session));
@@ -46,9 +48,15 @@ export function TopBar() {
   }, [session]);
 
   return (
-    <header className="w-full flex flex-col sm:flex-row items-center justify-between px-4 sm:px-8 py-4 border-b border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-black/80 backdrop-blur z-10 sticky top-0">
-      <div className="flex items-center gap-2">
-        <span className="font-bold text-xl tracking-tight bg-gradient-to-r from-[#6a82fb] to-[#fc5c7d] bg-clip-text text-transparent drop-shadow">AlChemist Voice Changer</span>
+    <header className="w-full flex flex-col sm:flex-row items-center justify-between px-4 sm:px-8 py-4 border-b border-purple-900/40 bg-black/60 backdrop-blur-lg z-20 sticky top-0 shadow-lg">
+      <div className="flex items-center gap-4">
+        <span className="font-extrabold text-3xl tracking-tight bg-gradient-to-r from-[#a78bfa] to-[#f472b6] bg-clip-text text-transparent drop-shadow-lg select-none">AlChemist Voice Changer</span>
+        <button
+          className="ml-4 px-4 py-2 rounded-full bg-gradient-to-r from-[#a78bfa] to-[#f472b6] text-white font-bold shadow hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#a78bfa]"
+          onClick={() => setOpen(true)}
+        >
+          History
+        </button>
       </div>
       <div className="flex items-center gap-6">
         {/* Credit Balance */}
