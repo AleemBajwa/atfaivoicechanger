@@ -125,11 +125,11 @@ export default function Home() {
       <a href="#main-content" className="sr-only focus:not-sr-only absolute top-2 left-2 bg-blue-600 text-white px-4 py-2 rounded z-50">Skip to main content</a>
       <main id="main-content" className="flex flex-col items-center justify-center min-h-[80vh] w-full px-2 sm:px-4">
         {/* Centered Card */}
-        <section className="w-full max-w-xl bg-white dark:bg-zinc-900 rounded-2xl shadow-lg p-4 sm:p-8 flex flex-col items-center gap-6 border border-gray-100 dark:border-zinc-800 mt-8 sm:mt-12">
-          <h1 className="text-2xl font-bold mb-2 text-center">AI Voice Changer</h1>
+        <section className="w-full max-w-xl bg-white/20 dark:bg-zinc-900/30 rounded-3xl shadow-2xl p-8 flex flex-col items-center gap-8 border border-white/30 dark:border-zinc-800/60 backdrop-blur-lg mt-16 animate-fade-in">
+          <h1 className="text-4xl font-extrabold text-center mb-2 tracking-tight bg-gradient-to-r from-[#6a82fb] to-[#fc5c7d] bg-clip-text text-transparent drop-shadow-lg">AlChemist Voice Changer</h1>
           {/* Text Input */}
           <textarea
-            className="w-full min-h-[100px] max-h-[200px] rounded-lg border border-gray-200 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800 p-4 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none transition"
+            className="w-full min-h-[100px] max-h-[200px] rounded-2xl border border-white/30 dark:border-zinc-700 bg-white/40 dark:bg-zinc-800/40 p-4 text-lg focus:outline-none focus:ring-2 focus:ring-[#6a82fb] resize-none transition shadow-inner placeholder:text-gray-400"
             placeholder="Type your text here..."
             value={input}
             onChange={e => setInput(e.target.value)}
@@ -140,7 +140,7 @@ export default function Home() {
           <select
             id="voice-select"
             aria-label="Select a voice"
-            className="w-full rounded-lg border border-gray-200 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800 p-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+            className="w-full rounded-2xl border border-white/30 dark:border-zinc-700 bg-white/40 dark:bg-zinc-800/40 p-3 text-lg focus:outline-none focus:ring-2 focus:ring-[#fc5c7d] transition shadow-inner"
             value={voice}
             onChange={e => setVoice(e.target.value)}
           >
@@ -152,12 +152,12 @@ export default function Home() {
             <option value="ErXwobaYiN019PkySvjV">Antoni (Legacy)</option>
           </select>
           <div aria-live="polite" className="w-full">
-            {error && <div className="text-red-500 text-sm w-full text-center">{error}</div>}
-            {success && <div className="text-green-600 text-sm w-full text-center">{success}</div>}
+            {error && <div className="text-red-500 text-base w-full text-center font-semibold">{error}</div>}
+            {success && <div className="text-green-400 text-base w-full text-center font-semibold">{success}</div>}
           </div>
           {/* Convert Button */}
           <button
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition text-lg shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full py-3 rounded-full bg-gradient-to-r from-[#6a82fb] to-[#fc5c7d] text-white font-bold text-xl shadow-lg hover:scale-105 hover:shadow-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#fc5c7d]"
             onClick={handleConvert}
             disabled={processing}
           >
@@ -165,21 +165,21 @@ export default function Home() {
           </button>
         </section>
         {/* Results/History Area */}
-        <section className="w-full max-w-xl mt-6 sm:mt-10">
-          <h2 className="text-lg font-semibold mb-4">History</h2>
+        <section className="w-full max-w-xl mt-10 animate-fade-in">
+          <h2 className="text-2xl font-bold mb-4 text-white/90 dark:text-white/80 tracking-tight">History</h2>
           {audioUrl && (
             <div className="mb-6 flex flex-col items-center">
               <audio controls src={audioUrl} className="w-full" />
-              <div className="text-xs text-gray-500 mt-2">Most recent result</div>
+              <div className="text-xs text-gray-300 mt-2">Most recent result</div>
             </div>
           )}
           <div className="flex flex-col gap-4">
             {history.length === 0 && (
-              <div className="bg-gray-100 dark:bg-zinc-800 rounded-lg p-4 text-gray-700 dark:text-gray-200">No history yet.</div>
+              <div className="bg-white/20 dark:bg-zinc-800/40 rounded-xl p-4 text-gray-200 dark:text-gray-300 shadow-inner">No history yet.</div>
             )}
             {history.map((item, idx) => (
-              <div key={item.id || idx} className="bg-gray-100 dark:bg-zinc-800 rounded-lg p-4 text-gray-700 dark:text-gray-200">
-                <div className="font-semibold">{item.text}</div>
+              <div key={item.id || idx} className="bg-white/20 dark:bg-zinc-800/40 rounded-xl p-4 text-gray-200 dark:text-gray-300 shadow-inner">
+                <div className="font-semibold text-lg">{item.text}</div>
                 <div className="text-xs mt-1">Voice: {item.voice_id} | {item.chars_used} chars</div>
                 <div className="text-xs text-gray-400">{new Date(item.created_at).toLocaleString()}</div>
               </div>

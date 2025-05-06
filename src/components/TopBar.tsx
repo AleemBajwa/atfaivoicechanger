@@ -48,7 +48,7 @@ export function TopBar() {
   return (
     <header className="w-full flex flex-col sm:flex-row items-center justify-between px-4 sm:px-8 py-4 border-b border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-black/80 backdrop-blur z-10 sticky top-0">
       <div className="flex items-center gap-2">
-        <span className="font-bold text-xl tracking-tight">AI Voice Changer</span>
+        <span className="font-bold text-xl tracking-tight bg-gradient-to-r from-[#6a82fb] to-[#fc5c7d] bg-clip-text text-transparent drop-shadow">AlChemist Voice Changer</span>
       </div>
       <div className="flex items-center gap-6">
         {/* Credit Balance */}
