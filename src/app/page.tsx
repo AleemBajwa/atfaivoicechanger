@@ -27,6 +27,7 @@ export default function Home() {
   const [history, setHistory] = useState<UsageHistory[]>([]);
   const [success, setSuccess] = useState<string | null>(null);
   const [historyModalOpen, setHistoryModalOpen] = useState(false);
+  const MAX_CHARS = 1000;
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSession(data.session));
@@ -132,18 +133,23 @@ export default function Home() {
             <h1 className="text-4xl font-extrabold text-center mb-2 tracking-tight bg-gradient-to-r from-[#6a82fb] to-[#fc5c7d] bg-clip-text text-transparent drop-shadow-lg">AlChemist Voice Changer</h1>
             {/* Text Input */}
             <textarea
-              className="w-full min-h-[100px] max-h-[200px] rounded-2xl border border-white/30 dark:border-zinc-700 bg-white/40 dark:bg-zinc-800/40 p-4 text-lg focus:outline-none focus:ring-2 focus:ring-[#6a82fb] resize-none transition shadow-inner placeholder:text-gray-400"
+              className="w-full min-h-[100px] max-h-[200px] rounded-2xl border border-white/30 dark:border-zinc-700 bg-white/40 dark:bg-zinc-800/40 p-4 text-lg focus:outline-none focus:ring-2 focus:ring-[#6a82fb] resize-none transition shadow-inner placeholder:text-gray-300 text-black dark:text-white"
               placeholder="Type your text here..."
               value={input}
               onChange={e => setInput(e.target.value)}
               aria-label="Text to convert"
+              maxLength={MAX_CHARS}
             />
+            <div className="w-full flex justify-between items-center text-sm mt-1">
+              <span className={input.length > MAX_CHARS ? "text-red-400" : "text-gray-300"}>{input.length} / {MAX_CHARS} characters</span>
+              {input.length > MAX_CHARS && <span className="text-red-400 ml-2">Max 1000 characters allowed</span>}
+            </div>
             {/* Voice Selection */}
             <label htmlFor="voice-select" className="sr-only">Select a voice</label>
             <select
               id="voice-select"
               aria-label="Select a voice"
-              className="w-full rounded-2xl border border-white/30 dark:border-zinc-700 bg-white/40 dark:bg-zinc-800/40 p-3 text-lg focus:outline-none focus:ring-2 focus:ring-[#fc5c7d] transition shadow-inner"
+              className="w-full rounded-2xl border border-white/30 dark:border-zinc-700 bg-white/40 dark:bg-zinc-800/40 p-3 text-lg focus:outline-none focus:ring-2 focus:ring-[#fc5c7d] transition shadow-inner text-black dark:text-white placeholder:text-gray-300"
               value={voice}
               onChange={e => setVoice(e.target.value)}
             >
@@ -162,10 +168,23 @@ export default function Home() {
             <button
               className="w-full py-3 rounded-full bg-gradient-to-r from-[#6a82fb] to-[#fc5c7d] text-white font-bold text-xl shadow-lg hover:scale-105 hover:shadow-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#fc5c7d]"
               onClick={handleConvert}
-              disabled={processing}
+              disabled={processing || input.length === 0 || input.length > MAX_CHARS}
             >
               {processing ? "Converting..." : "Convert"}
             </button>
+            {/* Audio Player and Download */}
+            {audioUrl && (
+              <div className="w-full flex flex-col items-center gap-2 mt-4">
+                <audio controls src={audioUrl} className="w-full" />
+                <a
+                  href={audioUrl}
+                  download="converted-audio.mp3"
+                  className="mt-2 px-4 py-2 rounded-full bg-gradient-to-r from-[#a78bfa] to-[#f472b6] text-white font-bold shadow hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#a78bfa]"
+                >
+                  Download Audio
+                </a>
+              </div>
+            )}
           </section>
           {/* History Modal */}
           {historyModalOpen && (
