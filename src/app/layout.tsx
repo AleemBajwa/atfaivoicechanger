@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "AI Voice Changer",
-  description: "Transform your voice with AI technology",
+  description: "Transform your voice with AI technology - Version 2",
 };
 
 export default function RootLayout({
