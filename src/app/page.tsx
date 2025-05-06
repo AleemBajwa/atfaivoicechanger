@@ -25,7 +25,6 @@ export default function Home() {
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [history, setHistory] = useState<UsageHistory[]>([]);
   const [success, setSuccess] = useState<string | null>(null);
-  const [historyModalOpen, setHistoryModalOpen] = useState(false);
   const MAX_CHARS = 1000;
 
   useEffect(() => {
@@ -125,7 +124,7 @@ export default function Home() {
   return (
     <>
       <a href="#main-content" className="sr-only focus:not-sr-only absolute top-2 left-2 bg-blue-600 text-white px-4 py-2 rounded z-50">Skip to main content</a>
-      <main id="main-content" className="flex flex-col items-center justify-center min-h-[80vh] w-full px-2 sm:px-4">
+      <main id="main-content" className="flex flex-col md:flex-row items-start justify-center min-h-[80vh] w-full px-2 sm:px-4 gap-8">
         {/* Centered Card */}
         <section className="w-full max-w-xl bg-white/20 dark:bg-zinc-900/30 rounded-3xl shadow-2xl p-8 flex flex-col items-center gap-8 border border-white/30 dark:border-zinc-800/60 backdrop-blur-lg mt-16 animate-fade-in">
           <h1 className="text-4xl font-extrabold text-center mb-2 tracking-tight bg-gradient-to-r from-[#6a82fb] to-[#fc5c7d] bg-clip-text text-transparent drop-shadow-lg">AlChemist Voice Changer</h1>
@@ -184,33 +183,22 @@ export default function Home() {
             </div>
           )}
         </section>
-        {/* History Modal */}
-        {historyModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur" onClick={() => setHistoryModalOpen(false)}>
-            <div className="bg-gradient-to-br from-[#2d0036] via-[#6a1bc2] to-[#fc5c7d] rounded-2xl shadow-2xl p-8 max-w-xl w-full relative animate-fade-in" onClick={e => e.stopPropagation()}>
-              <button className="absolute top-4 right-4 text-white bg-purple-700 hover:bg-purple-800 rounded-full p-1 z-10" onClick={() => setHistoryModalOpen(false)} aria-label="Close history">✕</button>
-              <h2 className="text-2xl font-bold mb-4 text-white tracking-tight">History</h2>
-              {audioUrl && (
-                <div className="mb-6 flex flex-col items-center">
-                  <audio controls src={audioUrl} className="w-full" />
-                  <div className="text-xs text-gray-300 mt-2">Most recent result</div>
-                </div>
-              )}
-              <div className="flex flex-col gap-4 max-h-[60vh] overflow-y-auto">
-                {history.length === 0 && (
-                  <div className="bg-white/20 dark:bg-zinc-800/40 rounded-xl p-4 text-gray-200 dark:text-gray-300 shadow-inner">No history yet.</div>
-                )}
-                {history.map((item, idx) => (
-                  <div key={item.id || idx} className="bg-white/20 dark:bg-zinc-800/40 rounded-xl p-4 text-gray-200 dark:text-gray-300 shadow-inner">
-                    <div className="font-semibold text-lg">{item.text}</div>
-                    <div className="text-xs mt-1">Voice: {item.voice_id} | {item.chars_used} chars</div>
-                    <div className="text-xs text-gray-400">{new Date(item.created_at).toLocaleString()}</div>
-                  </div>
-                ))}
+        {/* History Sidebar */}
+        <aside className="hidden md:flex flex-col w-96 max-w-full bg-white/30 dark:bg-zinc-900/40 rounded-3xl shadow-2xl p-6 mt-16 border border-white/30 dark:border-zinc-800/60 backdrop-blur-lg animate-fade-in h-[600px] overflow-y-auto">
+          <h2 className="text-2xl font-bold mb-4 text-white tracking-tight">History</h2>
+          <div className="flex flex-col gap-4">
+            {history.length === 0 && (
+              <div className="bg-white/20 dark:bg-zinc-800/40 rounded-xl p-4 text-gray-200 dark:text-gray-300 shadow-inner">No history yet.</div>
+            )}
+            {history.map((item, idx) => (
+              <div key={item.id || idx} className="bg-white/30 dark:bg-zinc-800/50 rounded-xl p-4 text-gray-800 dark:text-gray-200 shadow-inner border border-white/20 dark:border-zinc-700">
+                <div className="font-semibold text-lg truncate" title={item.text}>{item.text}</div>
+                <div className="text-xs mt-1">Voice: {item.voice_id} | {item.chars_used} chars</div>
+                <div className="text-xs text-gray-400">{new Date(item.created_at).toLocaleString()}</div>
               </div>
-            </div>
+            ))}
           </div>
-        )}
+        </aside>
       </main>
     </>
   );
