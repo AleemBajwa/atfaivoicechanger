@@ -27,7 +27,7 @@ export default function BackgroundWave() {
 
     async function setupMic() {
       stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      audioCtx = new (window.AudioContext || ((window as unknown) as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
       analyser = audioCtx.createAnalyser();
       analyser.fftSize = 128;
       dataArray = new Uint8Array(analyser.frequencyBinCount);
@@ -146,7 +146,7 @@ export default function BackgroundWave() {
         onClick={() => setMicMode(m => !m)}
         className="fixed bottom-6 right-6 z-50 bg-gradient-to-r from-[#6a82fb] to-[#fc5c7d] text-white px-5 py-3 rounded-full shadow-lg font-bold text-lg hover:scale-105 hover:shadow-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#fc5c7d] backdrop-blur-lg"
         style={{ pointerEvents: 'auto' }}
-        aria-pressed={micMode}
+        aria-pressed={micMode ? "true" : "false"}
       >
         {micMode ? '🎤 Live Wave On' : '🎤 Live Wave Off'}
       </button>
