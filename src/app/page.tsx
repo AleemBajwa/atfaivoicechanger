@@ -90,7 +90,7 @@ export default function Home() {
     // Call ElevenLabs API
     try {
       const response = await axios.post(
-        "https://api.elevenlabs.io/v1/text-to-speech/" + process.env.ELEVENLABS_VOICE_ID,
+        "https://api.elevenlabs.io/v1/text-to-speech/" + voice,
         {
           text: input,
         },
