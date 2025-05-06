@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState, createContext, useContext } from "react";
+import React, { useEffect, useState, createContext } from "react";
 import { supabase } from "../lib/supabaseClient";
 import AuthForm from "./auth";
 import type { Session } from '@supabase/supabase-js';
