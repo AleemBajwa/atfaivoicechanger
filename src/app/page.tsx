@@ -87,20 +87,12 @@ export default function Home() {
       return;
     }
     setCredits(credits - 1);
-    // Call ElevenLabs API
+    // Call ElevenLabs API via server-side route
     try {
       const response = await axios.post(
-        "https://api.elevenlabs.io/v1/text-to-speech/" + voice,
-        {
-          text: input,
-        },
-        {
-          headers: {
-            "xi-api-key": process.env.ELEVENLABS_API_KEY,
-            "Content-Type": "application/json",
-          },
-          responseType: "arraybuffer",
-        }
+        "/api/elevenlabs",
+        { text: input, voice },
+        { responseType: "arraybuffer" }
       );
       const audioBlob = new Blob([response.data], { type: "audio/mpeg" });
       const url = URL.createObjectURL(audioBlob);
