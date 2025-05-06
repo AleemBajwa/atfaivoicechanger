@@ -1,36 +1,57 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AI Voice Changer
+
+A web-based voice changer app using Next.js, Supabase, Stripe, and ElevenLabs.
+
+## Features
+- User authentication (Supabase)
+- Credit system (free credits, usage, top-up)
+- Voice changer (ElevenLabs API)
+- Stripe payments for credit top-up
+- Lead capture (Google Sheets)
 
 ## Getting Started
 
-First, run the development server:
-
+### 1. Clone the repository
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# Clone this repo and cd into it
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Install dependencies
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 3. Set up environment variables
+Create a `.env.local` file in the root with the following:
+```
+NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+SUPABASE_PROJECT_ID=your-supabase-project-id
+ELEVENLABS_API_KEY=your-elevenlabs-api-key
+ELEVENLABS_VOICE_ID=your-elevenlabs-voice-id
+STRIPE_SECRET_KEY=your-stripe-secret-key
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=your-stripe-publishable-key
+GOOGLE_SHEETS_WEBHOOK_URL=your-google-sheets-webhook-url
+STRIPE_WEBHOOK_SECRET=your-stripe-webhook-secret
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 4. Run the development server
+```bash
+npm run dev
+```
 
-## Learn More
+Open [http://localhost:3000](http://localhost:3000) to view the app.
 
-To learn more about Next.js, take a look at the following resources:
+### 5. Deploy
+- Recommended: [Vercel](https://vercel.com/)
+- Set all environment variables in your deployment platform
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Database Setup
+- Run the SQL in the requirements to create the `credits`, `usage_history`, and `payments` tables.
+- Add the `increment_credits` function for Stripe webhook support.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Stripe Webhook
+- Set up a Stripe webhook endpoint for `/api/stripe-webhook` and use the signing secret in `STRIPE_WEBHOOK_SECRET`.
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Support
+For issues, open an issue in this repo or contact the project maintainer.
