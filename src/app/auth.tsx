@@ -48,7 +48,7 @@ export default function AuthForm({ onAuth }: { onAuth?: () => void }) {
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <input
           type="email"
-          className="rounded border px-3 py-2 bg-gray-50 dark:bg-zinc-800 border-gray-200 dark:border-zinc-700 focus:outline-none"
+          className="rounded border px-3 py-2 bg-gray-50 dark:bg-zinc-800 border-gray-200 dark:border-zinc-700 focus:outline-none text-black dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-300"
           placeholder="Email"
           value={email}
           onChange={e => setEmail(e.target.value)}
@@ -56,7 +56,7 @@ export default function AuthForm({ onAuth }: { onAuth?: () => void }) {
         />
         <input
           type="password"
-          className="rounded border px-3 py-2 bg-gray-50 dark:bg-zinc-800 border-gray-200 dark:border-zinc-700 focus:outline-none"
+          className="rounded border px-3 py-2 bg-gray-50 dark:bg-zinc-800 border-gray-200 dark:border-zinc-700 focus:outline-none text-black dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-300"
           placeholder="Password"
           value={password}
           onChange={e => setPassword(e.target.value)}
