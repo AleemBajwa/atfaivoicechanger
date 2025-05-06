@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server';
 import axios from 'axios';
 
 export async function POST(req: NextRequest) {
+  console.log("ELEVENLABS_API_KEY loaded:", !!process.env.ELEVENLABS_API_KEY);
   const { text, voice } = await req.json();
   try {
     const response = await axios.post(
