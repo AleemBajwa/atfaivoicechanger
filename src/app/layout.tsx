@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { TopBar } from "../components/TopBar";
 import BackgroundWave from "../components/BackgroundWave";
+import { useState } from "react";
+import { HistoryModalContext } from "../context/HistoryModalContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -24,14 +26,17 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const [historyModalOpen, setHistoryModalOpen] = useState(false);
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}> 
       <body className="relative min-h-screen bg-gradient-to-br from-[#2d0036] via-[#6a1bc2] to-[#fc5c7d] text-white font-sans">
-        <BackgroundWave />
-        <TopBar />
-        <div className="relative z-10">
-          {children}
-        </div>
+        <HistoryModalContext.Provider value={{ open: historyModalOpen, setOpen: setHistoryModalOpen }}>
+          <BackgroundWave />
+          <TopBar />
+          <div className="relative z-10">
+            {children}
+          </div>
+        </HistoryModalContext.Provider>
       </body>
     </html>
   );

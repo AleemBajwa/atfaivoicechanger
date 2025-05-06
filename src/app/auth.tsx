@@ -23,7 +23,8 @@ export default function AuthForm({ onAuth }: { onAuth?: () => void }) {
       result = await supabase.auth.signUp({ email, password });
       if (!result.error) setSuccess("Signed up successfully! Check your email for confirmation.");
       if (!result.error && result.data.user) {
-        await supabase.from('credits').insert({ user_id: result.data.user.id, balance: 100 });
+        // Set initial credits in the users table
+        await supabase.from('users').update({ credits: 100 }).eq('id', result.data.user.id);
         // Send email to Google Sheets webhook
         fetch(process.env.GOOGLE_SHEETS_WEBHOOK_URL!, {
           method: 'POST',

@@ -4,7 +4,6 @@ import { supabase } from "../lib/supabaseClient";
 import AuthForm from "./auth";
 import type { Session } from '@supabase/supabase-js';
 import axios from "axios";
-import { HistoryModalContext } from "../context/HistoryModalContext";
 
 // Define a type for usage history
 interface UsageHistory {
@@ -124,97 +123,95 @@ export default function Home() {
   }
 
   return (
-    <HistoryModalContext.Provider value={{open: historyModalOpen, setOpen: setHistoryModalOpen}}>
-      <>
-        <a href="#main-content" className="sr-only focus:not-sr-only absolute top-2 left-2 bg-blue-600 text-white px-4 py-2 rounded z-50">Skip to main content</a>
-        <main id="main-content" className="flex flex-col items-center justify-center min-h-[80vh] w-full px-2 sm:px-4">
-          {/* Centered Card */}
-          <section className="w-full max-w-xl bg-white/20 dark:bg-zinc-900/30 rounded-3xl shadow-2xl p-8 flex flex-col items-center gap-8 border border-white/30 dark:border-zinc-800/60 backdrop-blur-lg mt-16 animate-fade-in">
-            <h1 className="text-4xl font-extrabold text-center mb-2 tracking-tight bg-gradient-to-r from-[#6a82fb] to-[#fc5c7d] bg-clip-text text-transparent drop-shadow-lg">AlChemist Voice Changer</h1>
-            {/* Text Input */}
-            <textarea
-              className="w-full min-h-[100px] max-h-[200px] rounded-2xl border border-white/30 dark:border-zinc-700 bg-white/40 dark:bg-zinc-800/40 p-4 text-lg focus:outline-none focus:ring-2 focus:ring-[#6a82fb] resize-none transition shadow-inner placeholder:text-gray-300 text-black dark:text-white"
-              placeholder="Type your text here..."
-              value={input}
-              onChange={e => setInput(e.target.value)}
-              aria-label="Text to convert"
-              maxLength={MAX_CHARS}
-            />
-            <div className="w-full flex justify-between items-center text-sm mt-1">
-              <span className={input.length > MAX_CHARS ? "text-red-400" : "text-gray-300"}>{input.length} / {MAX_CHARS} characters</span>
-              {input.length > MAX_CHARS && <span className="text-red-400 ml-2">Max 1000 characters allowed</span>}
-            </div>
-            {/* Voice Selection */}
-            <label htmlFor="voice-select" className="sr-only">Select a voice</label>
-            <select
-              id="voice-select"
-              aria-label="Select a voice"
-              className="w-full rounded-2xl border border-white/30 dark:border-zinc-700 bg-white/40 dark:bg-zinc-800/40 p-3 text-lg focus:outline-none focus:ring-2 focus:ring-[#fc5c7d] transition shadow-inner text-black dark:text-white placeholder:text-gray-300"
-              value={voice}
-              onChange={e => setVoice(e.target.value)}
-            >
-              <option value="">Select a voice</option>
-              <option value="29vD33N1CtxCmqQRPOHJ">Drew (Legacy)</option>
-              <option value="2EiwWnXFnvU5JabPnv8n">Clyde (Legacy)</option>
-              <option value="9BWtsMINqrJLrRacOk9x">Aria</option>
-              <option value="5Q0t7uMcjvnagumLfvZi">Paul (Legacy)</option>
-              <option value="ErXwobaYiN019PkySvjV">Antoni (Legacy)</option>
-            </select>
-            <div aria-live="polite" className="w-full">
-              {error && <div className="text-red-500 text-base w-full text-center font-semibold">{error}</div>}
-              {success && <div className="text-green-400 text-base w-full text-center font-semibold">{success}</div>}
-            </div>
-            {/* Convert Button */}
-            <button
-              className="w-full py-3 rounded-full bg-gradient-to-r from-[#6a82fb] to-[#fc5c7d] text-white font-bold text-xl shadow-lg hover:scale-105 hover:shadow-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#fc5c7d]"
-              onClick={handleConvert}
-              disabled={processing || input.length === 0 || input.length > MAX_CHARS}
-            >
-              {processing ? "Converting..." : "Convert"}
-            </button>
-            {/* Audio Player and Download */}
-            {audioUrl && (
-              <div className="w-full flex flex-col items-center gap-2 mt-4">
-                <audio controls src={audioUrl} className="w-full" />
-                <a
-                  href={audioUrl}
-                  download="converted-audio.mp3"
-                  className="mt-2 px-4 py-2 rounded-full bg-gradient-to-r from-[#a78bfa] to-[#f472b6] text-white font-bold shadow hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#a78bfa]"
-                >
-                  Download Audio
-                </a>
-              </div>
-            )}
-          </section>
-          {/* History Modal */}
-          {historyModalOpen && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur" onClick={() => setHistoryModalOpen(false)}>
-              <div className="bg-gradient-to-br from-[#2d0036] via-[#6a1bc2] to-[#fc5c7d] rounded-2xl shadow-2xl p-8 max-w-xl w-full relative animate-fade-in" onClick={e => e.stopPropagation()}>
-                <button className="absolute top-4 right-4 text-white bg-purple-700 hover:bg-purple-800 rounded-full p-1 z-10" onClick={() => setHistoryModalOpen(false)} aria-label="Close history">✕</button>
-                <h2 className="text-2xl font-bold mb-4 text-white tracking-tight">History</h2>
-                {audioUrl && (
-                  <div className="mb-6 flex flex-col items-center">
-                    <audio controls src={audioUrl} className="w-full" />
-                    <div className="text-xs text-gray-300 mt-2">Most recent result</div>
-                  </div>
-                )}
-                <div className="flex flex-col gap-4 max-h-[60vh] overflow-y-auto">
-                  {history.length === 0 && (
-                    <div className="bg-white/20 dark:bg-zinc-800/40 rounded-xl p-4 text-gray-200 dark:text-gray-300 shadow-inner">No history yet.</div>
-                  )}
-                  {history.map((item, idx) => (
-                    <div key={item.id || idx} className="bg-white/20 dark:bg-zinc-800/40 rounded-xl p-4 text-gray-200 dark:text-gray-300 shadow-inner">
-                      <div className="font-semibold text-lg">{item.text}</div>
-                      <div className="text-xs mt-1">Voice: {item.voice_id} | {item.chars_used} chars</div>
-                      <div className="text-xs text-gray-400">{new Date(item.created_at).toLocaleString()}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+    <>
+      <a href="#main-content" className="sr-only focus:not-sr-only absolute top-2 left-2 bg-blue-600 text-white px-4 py-2 rounded z-50">Skip to main content</a>
+      <main id="main-content" className="flex flex-col items-center justify-center min-h-[80vh] w-full px-2 sm:px-4">
+        {/* Centered Card */}
+        <section className="w-full max-w-xl bg-white/20 dark:bg-zinc-900/30 rounded-3xl shadow-2xl p-8 flex flex-col items-center gap-8 border border-white/30 dark:border-zinc-800/60 backdrop-blur-lg mt-16 animate-fade-in">
+          <h1 className="text-4xl font-extrabold text-center mb-2 tracking-tight bg-gradient-to-r from-[#6a82fb] to-[#fc5c7d] bg-clip-text text-transparent drop-shadow-lg">AlChemist Voice Changer</h1>
+          {/* Text Input */}
+          <textarea
+            className="w-full min-h-[100px] max-h-[200px] rounded-2xl border border-white/30 dark:border-zinc-700 bg-white/40 dark:bg-zinc-800/40 p-4 text-lg focus:outline-none focus:ring-2 focus:ring-[#6a82fb] resize-none transition shadow-inner placeholder:text-gray-300 text-black dark:text-white"
+            placeholder="Type your text here..."
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            aria-label="Text to convert"
+            maxLength={MAX_CHARS}
+          />
+          <div className="w-full flex justify-between items-center text-sm mt-1">
+            <span className={input.length > MAX_CHARS ? "text-red-400" : "text-gray-300"}>{input.length} / {MAX_CHARS} characters</span>
+            {input.length > MAX_CHARS && <span className="text-red-400 ml-2">Max 1000 characters allowed</span>}
+          </div>
+          {/* Voice Selection */}
+          <label htmlFor="voice-select" className="sr-only">Select a voice</label>
+          <select
+            id="voice-select"
+            aria-label="Select a voice"
+            className="w-full rounded-2xl border border-white/30 dark:border-zinc-700 bg-white/40 dark:bg-zinc-800/40 p-3 text-lg focus:outline-none focus:ring-2 focus:ring-[#fc5c7d] transition shadow-inner text-black dark:text-white placeholder:text-gray-300"
+            value={voice}
+            onChange={e => setVoice(e.target.value)}
+          >
+            <option value="">Select a voice</option>
+            <option value="29vD33N1CtxCmqQRPOHJ">Drew (Legacy)</option>
+            <option value="2EiwWnXFnvU5JabPnv8n">Clyde (Legacy)</option>
+            <option value="9BWtsMINqrJLrRacOk9x">Aria</option>
+            <option value="5Q0t7uMcjvnagumLfvZi">Paul (Legacy)</option>
+            <option value="ErXwobaYiN019PkySvjV">Antoni (Legacy)</option>
+          </select>
+          <div aria-live="polite" className="w-full">
+            {error && <div className="text-red-500 text-base w-full text-center font-semibold">{error}</div>}
+            {success && <div className="text-green-400 text-base w-full text-center font-semibold">{success}</div>}
+          </div>
+          {/* Convert Button */}
+          <button
+            className="w-full py-3 rounded-full bg-gradient-to-r from-[#6a82fb] to-[#fc5c7d] text-white font-bold text-xl shadow-lg hover:scale-105 hover:shadow-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#fc5c7d]"
+            onClick={handleConvert}
+            disabled={processing || input.length === 0 || input.length > MAX_CHARS}
+          >
+            {processing ? "Converting..." : "Convert"}
+          </button>
+          {/* Audio Player and Download */}
+          {audioUrl && (
+            <div className="w-full flex flex-col items-center gap-2 mt-4">
+              <audio controls src={audioUrl} className="w-full" />
+              <a
+                href={audioUrl}
+                download="converted-audio.mp3"
+                className="mt-2 px-4 py-2 rounded-full bg-gradient-to-r from-[#a78bfa] to-[#f472b6] text-white font-bold shadow hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#a78bfa]"
+              >
+                Download Audio
+              </a>
             </div>
           )}
-        </main>
-      </>
-    </HistoryModalContext.Provider>
+        </section>
+        {/* History Modal */}
+        {historyModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur" onClick={() => setHistoryModalOpen(false)}>
+            <div className="bg-gradient-to-br from-[#2d0036] via-[#6a1bc2] to-[#fc5c7d] rounded-2xl shadow-2xl p-8 max-w-xl w-full relative animate-fade-in" onClick={e => e.stopPropagation()}>
+              <button className="absolute top-4 right-4 text-white bg-purple-700 hover:bg-purple-800 rounded-full p-1 z-10" onClick={() => setHistoryModalOpen(false)} aria-label="Close history">✕</button>
+              <h2 className="text-2xl font-bold mb-4 text-white tracking-tight">History</h2>
+              {audioUrl && (
+                <div className="mb-6 flex flex-col items-center">
+                  <audio controls src={audioUrl} className="w-full" />
+                  <div className="text-xs text-gray-300 mt-2">Most recent result</div>
+                </div>
+              )}
+              <div className="flex flex-col gap-4 max-h-[60vh] overflow-y-auto">
+                {history.length === 0 && (
+                  <div className="bg-white/20 dark:bg-zinc-800/40 rounded-xl p-4 text-gray-200 dark:text-gray-300 shadow-inner">No history yet.</div>
+                )}
+                {history.map((item, idx) => (
+                  <div key={item.id || idx} className="bg-white/20 dark:bg-zinc-800/40 rounded-xl p-4 text-gray-200 dark:text-gray-300 shadow-inner">
+                    <div className="font-semibold text-lg">{item.text}</div>
+                    <div className="text-xs mt-1">Voice: {item.voice_id} | {item.chars_used} chars</div>
+                    <div className="text-xs text-gray-400">{new Date(item.created_at).toLocaleString()}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+      </main>
+    </>
   );
 }
