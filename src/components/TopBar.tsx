@@ -4,7 +4,7 @@ import React, { useEffect, useState, useContext } from "react";
 import { supabase } from "../lib/supabaseClient";
 import type { Session } from '@supabase/supabase-js';
 import { loadStripe } from '@stripe/stripe-js';
-import { HistoryModalContext } from "../app/page";
+import { HistoryModalContext } from "../context/HistoryModalContext";
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
