@@ -15,19 +15,17 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "AI Voice Changer",
-  description: "Transform your voice with AI technology - Version 2",
+  description: "Transform your voice with AI technology",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <TopBar />
         {children}
       </body>
