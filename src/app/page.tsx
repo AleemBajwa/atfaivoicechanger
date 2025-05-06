@@ -153,8 +153,11 @@ export default function Home() {
             onChange={e => setVoice(e.target.value)}
           >
             <option value="">Select a voice</option>
-            <option value="voice1">Voice 1</option>
-            <option value="voice2">Voice 2</option>
+            <option value="29vD33N1CtxCmqQRPOHJ">Drew (Legacy)</option>
+            <option value="2EiwWnXFnvU5JabPnv8n">Clyde (Legacy)</option>
+            <option value="9BWtsMINqrJLrRacOk9x">Aria</option>
+            <option value="5Q0t7uMcjvnagumLfvZi">Paul (Legacy)</option>
+            <option value="ErXwobaYiN019PkySvjV">Antoni (Legacy)</option>
           </select>
           <div aria-live="polite" className="w-full">
             {error && <div className="text-red-500 text-sm w-full text-center">{error}</div>}
