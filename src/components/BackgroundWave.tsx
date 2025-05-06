@@ -13,7 +13,7 @@ export default function BackgroundWave() {
   const [micMode, setMicMode] = useState(false);
   const audioData = useRef<number[]>([]);
   const analyserRef = useRef<AnalyserNode | null>(null);
-  const animationRef = useRef<number>();
+  const animationRef = useRef<number | undefined>(undefined);
 
   // Microphone setup
   useEffect(() => {
