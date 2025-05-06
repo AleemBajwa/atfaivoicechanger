@@ -25,15 +25,15 @@ export function TopBar() {
 
   useEffect(() => {
     const fetchCredits = async () => {
-      if (session?.user.id) {
+      if (session?.user.email) {
         setLoadingCredits(true);
         const { data, error } = await supabase
-          .from('credits')
-          .select('balance')
-          .eq('user_id', session.user.id)
+          .from('users')
+          .select('credits')
+          .eq('email', session.user.email)
           .single();
         if (data && !error) {
-          setCredits(data.balance);
+          setCredits(data.credits);
         } else {
           setCredits(null);
         }

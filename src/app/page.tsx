@@ -38,13 +38,13 @@ export default function Home() {
 
   // Fetch credits for the user
   useEffect(() => {
-    if (session?.user.id) {
+    if (session?.user.email) {
       supabase
-        .from('credits')
-        .select('balance')
-        .eq('user_id', session.user.id)
+        .from('users')
+        .select('credits')
+        .eq('email', session.user.email)
         .single()
-        .then(({ data }) => setCredits(data?.balance ?? null));
+        .then(({ data }) => setCredits(data?.credits ?? null));
     }
   }, [session]);
 
@@ -78,9 +78,9 @@ export default function Home() {
     setProcessing(true);
     // Deduct 1 credit per conversion (customize as needed)
     const { error: updateError } = await supabase
-      .from('credits')
-      .update({ balance: credits - 1 })
-      .eq('user_id', session!.user.id);
+      .from('users')
+      .update({ credits: credits - 1 })
+      .eq('email', session!.user.email);
     if (updateError) {
       setError("Failed to deduct credits. Try again.");
       setProcessing(false);
@@ -165,7 +165,6 @@ export default function Home() {
             className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition text-lg shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             onClick={handleConvert}
             disabled={processing}
-            aria-disabled={processing ? "true" : "false"}
           >
             {processing ? "Converting..." : "Convert"}
           </button>
