@@ -1,3 +1,4 @@
+"use client";
 import React, { useRef, useEffect } from 'react';
 
 const WAVE_GRADIENT_START = '#6a82fb';
