@@ -74,22 +74,22 @@ export default function Home() {
       setError("Please select a voice.");
       return;
     }
-    if (credits === null || credits < 1) {
+    const charsToDeduct = Math.ceil(input.length / 10);
+    if (credits === null || credits < charsToDeduct) {
       setError("Not enough credits. Please top up.");
       return;
     }
     setProcessing(true);
-    // Deduct 1 credit per conversion (customize as needed)
     const { error: updateError } = await supabase
       .from('users')
-      .update({ credits: credits - 1 })
+      .update({ credits: credits - charsToDeduct })
       .eq('email', session!.user.email);
     if (updateError) {
       setError("Failed to deduct credits. Try again.");
       setProcessing(false);
       return;
     }
-    setCredits(credits - 1);
+    setCredits(credits - charsToDeduct);
     // Call ElevenLabs API via server-side route
     try {
       const response = await axios.post(
