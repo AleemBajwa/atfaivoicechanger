@@ -4,6 +4,7 @@ import axios from 'axios';
 export async function POST(req: NextRequest) {
   console.log("ELEVENLABS_API_KEY loaded:", !!process.env.ELEVENLABS_API_KEY);
   const { text, voice } = await req.json();
+  console.log("Requesting ElevenLabs with voice:", voice, "text:", text);
   try {
     const response = await axios.post(
       `https://api.elevenlabs.io/v1/text-to-speech/${voice}`,
@@ -23,6 +24,9 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error("ElevenLabs API error:", error.response?.data);
+    }
     let message = 'Unknown error';
     let status = 500;
     if (axios.isAxiosError(error)) {
