@@ -21,9 +21,17 @@ export async function POST(req: NextRequest) {
         'Content-Type': 'audio/mpeg',
       },
     });
-  } catch (error: any) {
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: error.response?.status || 500,
+  } catch (error) {
+    let message = 'Unknown error';
+    let status = 500;
+    if (axios.isAxiosError(error)) {
+      message = error.message;
+      status = error.response?.status || 500;
+    } else if (error instanceof Error) {
+      message = error.message;
+    }
+    return new Response(JSON.stringify({ error: message }), {
+      status,
       headers: { 'Content-Type': 'application/json' },
     });
   }
