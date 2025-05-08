@@ -57,9 +57,16 @@ export function TopBar() {
         </span>
         <button
           className="ml-2 bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded transition text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-          onClick={() => setShowTopUp(true)}
+          onClick={async () => {
+            const stripe = await stripePromise;
+            const res = await fetch("/api/create-checkout-session", { method: "POST" });
+            const data = await res.json();
+            await stripe?.redirectToCheckout({ sessionId: data.sessionId });
+          }}
           aria-label="Top up credits"
-        >Top Up</button>
+        >
+          Top Up
+        </button>
         {/* User Profile or Auth */}
         {session ? (
           <div className="flex items-center gap-3">
@@ -73,25 +80,6 @@ export function TopBar() {
           <div className="w-8 h-8 rounded-full bg-gray-300 dark:bg-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-300 font-bold">U</div>
         )}
       </div>
-      {showTopUp && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50" role="dialog" aria-modal="true">
-          <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-lg p-8 max-w-sm w-full flex flex-col items-center" tabIndex={-1}>
-            <h3 className="text-lg font-bold mb-4">Buy Credits</h3>
-            <div className="mb-4">$5 for 500 credits</div>
-            <button
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500"
-              onClick={async () => {
-                const stripe = await stripePromise;
-                const res = await fetch("/api/create-checkout-session", { method: "POST" });
-                const data = await res.json();
-                await stripe?.redirectToCheckout({ sessionId: data.sessionId });
-              }}
-              aria-label="Buy 500 credits for $5"
-            >Buy</button>
-            <button className="mt-2 px-4 py-2 bg-gray-300 dark:bg-zinc-700 rounded hover:bg-gray-400 dark:hover:bg-zinc-600 focus:outline-none focus:ring-2 focus:ring-gray-500" onClick={() => setShowTopUp(false)} aria-label="Close buy credits modal">Close</button>
-          </div>
-        </div>
-      )}
     </header>
   );
 } 
