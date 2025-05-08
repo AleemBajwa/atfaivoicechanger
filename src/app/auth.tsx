@@ -103,6 +103,8 @@ export default function AuthForm({ onAuth }: { onAuth?: () => void }) {
           onChange={e => setPassword(e.target.value)}
           required
         />
+        {error && <div className="text-red-500 text-sm">{error}</div>}
+        {success && <div className="text-green-600 text-sm">{success}</div>}
         <button
           type="button"
           className="text-blue-600 hover:underline text-left text-sm"
@@ -111,8 +113,6 @@ export default function AuthForm({ onAuth }: { onAuth?: () => void }) {
         >
           Forgot Password?
         </button>
-        {error && <div className="text-red-500 text-sm">{error}</div>}
-        {success && <div className="text-green-600 text-sm">{success}</div>}
         <button
           type="submit"
           className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded transition"
