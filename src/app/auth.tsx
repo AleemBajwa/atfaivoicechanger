@@ -103,16 +103,14 @@ export default function AuthForm({ onAuth }: { onAuth?: () => void }) {
           onChange={e => setPassword(e.target.value)}
           required
         />
-        {mode === "signin" && (
-          <button
-            type="button"
-            className="text-blue-600 hover:underline text-left text-sm"
-            onClick={handleForgotPassword}
-            disabled={loading || !email}
-          >
-            Forgot Password?
-          </button>
-        )}
+        <button
+          type="button"
+          className="text-blue-600 hover:underline text-left text-sm"
+          onClick={handleForgotPassword}
+          disabled={loading || !email}
+        >
+          Forgot Password?
+        </button>
         {error && <div className="text-red-500 text-sm">{error}</div>}
         {success && <div className="text-green-600 text-sm">{success}</div>}
         <button
