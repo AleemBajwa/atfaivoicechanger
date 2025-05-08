@@ -21,7 +21,22 @@ export default function AuthForm({ onAuth }: { onAuth?: () => void }) {
       if (!result.error) setSuccess("Signed in successfully!");
     } else {
       result = await supabase.auth.signUp({ email, password });
-      if (!result.error) setSuccess("Signed up successfully! Check your email for confirmation.");
+      if (!result.error && !result.data.user) {
+        // User already exists but is unconfirmed
+        setError('You are already signed up. If you forgot your password, click "Forgot Password?" below to reset it.');
+        setLoading(false);
+        return;
+      }
+      if (!result.error) {
+        // Check if user already exists in users table
+        const { data: existingUser } = await supabase.from('users').select('id').eq('email', email).single();
+        if (existingUser) {
+          setError('You are already signed up. If you forgot your password, click "Forgot Password?" below to reset it.');
+          setLoading(false);
+          return;
+        }
+        setSuccess("Signed up successfully! Check your email for confirmation.");
+      }
       if (!result.error && result.data.user) {
         // Set initial credits in the users table
         await supabase.from('users').update({ credits: 100 }).eq('id', result.data.user.id);
