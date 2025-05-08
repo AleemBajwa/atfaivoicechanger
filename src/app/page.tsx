@@ -4,6 +4,7 @@ import { supabase } from "../lib/supabaseClient";
 import AuthForm from "./auth";
 import type { Session } from '@supabase/supabase-js';
 import axios from "axios";
+import { useRouter, useSearchParams } from "next/navigation";
 
 // Define a type for usage history
 interface UsageHistory {
@@ -16,6 +17,8 @@ interface UsageHistory {
 }
 
 export default function Home() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [session, setSession] = useState<Session | null>(null);
   const [input, setInput] = useState("");
   const [voice, setVoice] = useState("");
@@ -60,6 +63,13 @@ export default function Home() {
         .then(({ data }) => setHistory(data ?? []));
     }
   }, [session]);
+
+  // Redirect to reset-password if access_token is present in the URL
+  useEffect(() => {
+    if (searchParams.get("access_token")) {
+      router.replace("/reset-password" + window.location.search);
+    }
+  }, [searchParams, router]);
 
   const handleConvert = async () => {
     setError(null);
