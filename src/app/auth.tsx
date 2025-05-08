@@ -72,21 +72,12 @@ export default function AuthForm({ onAuth }: { onAuth?: () => void }) {
     setLoading(true);
     setError(null);
     setSuccess(null);
-    // 1. Set password to a random value to lock the user out
-    const randomPassword = Math.random().toString(36).slice(-12) + Date.now();
-    const { error: updateError } = await supabase.auth.updateUser({ password: randomPassword });
-    if (updateError) {
-      setLoading(false);
-      setError('Failed to lock account: ' + updateError.message);
-      return;
-    }
-    // 2. Send password reset email
     const { error } = await supabase.auth.resetPasswordForEmail(email);
     setLoading(false);
     if (error) {
       setError(error.message);
     } else {
-      setSuccess('Your account has been locked for security. Please check your email to reset your password.');
+      setSuccess('Password reset email sent! Check your inbox.');
     }
   };
 
