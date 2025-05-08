@@ -36,7 +36,8 @@ function ResetPasswordForm() {
     if (error) {
       setError(error.message);
     } else {
-      setSuccess("Password reset successful! You can now sign in with your new password.");
+      setSuccess("Password reset successful! Please sign in with your new password.");
+      await supabase.auth.signOut();
       setTimeout(() => router.push("/"), 2000);
     }
   };
