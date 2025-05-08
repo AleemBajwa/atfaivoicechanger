@@ -35,9 +35,34 @@ export default function AuthForm({ onAuth }: { onAuth?: () => void }) {
     }
     setLoading(false);
     if (result.error) {
-      setError(result.error.message);
+      // Custom error for already registered user
+      if (
+        result.error.message.toLowerCase().includes("user already registered") ||
+        result.error.message.toLowerCase().includes("user already exists") ||
+        result.error.message.toLowerCase().includes("email already registered")
+      ) {
+        setError(
+          'You are already signed up. If you forgot your password, click "Forgot Password?" below to reset it.'
+        );
+      } else {
+        setError(result.error.message);
+      }
     } else {
       onAuth?.();
+    }
+  };
+
+  // Forgot password logic
+  const handleForgotPassword = async () => {
+    setLoading(true);
+    setError(null);
+    setSuccess(null);
+    const { error } = await supabase.auth.resetPasswordForEmail(email);
+    setLoading(false);
+    if (error) {
+      setError(error.message);
+    } else {
+      setSuccess('Password reset email sent! Check your inbox.');
     }
   };
 
@@ -63,6 +88,16 @@ export default function AuthForm({ onAuth }: { onAuth?: () => void }) {
           onChange={e => setPassword(e.target.value)}
           required
         />
+        {mode === "signin" && (
+          <button
+            type="button"
+            className="text-blue-600 hover:underline text-left text-sm"
+            onClick={handleForgotPassword}
+            disabled={loading || !email}
+          >
+            Forgot Password?
+          </button>
+        )}
         {error && <div className="text-red-500 text-sm">{error}</div>}
         {success && <div className="text-green-600 text-sm">{success}</div>}
         <button
