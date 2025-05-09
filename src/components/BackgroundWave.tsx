@@ -86,7 +86,7 @@ export default function BackgroundWave() {
       const barWidth = width / NUM_BARS;
       for (let i = 0; i < NUM_BARS; i++) {
         let barHeight;
-        let distortion = Math.sin(frame * 0.04 + i * 0.2 + mouse.current.x * 5 + mouse.current.y * 5) * 40 * mouse.current.y;
+        const distortion = Math.sin(frame * 0.04 + i * 0.2 + mouse.current.x * 5 + mouse.current.y * 5) * 40 * mouse.current.y;
         if (micMode && audioData.current.length > 0) {
           // Use audio data for bar height
           const audioIdx = Math.floor((i / NUM_BARS) * audioData.current.length);
