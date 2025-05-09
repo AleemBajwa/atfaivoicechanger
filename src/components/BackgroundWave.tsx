@@ -38,6 +38,7 @@ export default function BackgroundWave() {
     window.addEventListener('resize', handleResize);
 
     function drawGrid() {
+      if (!ctx) return;
       ctx.save();
       ctx.globalAlpha = 0.12;
       ctx.strokeStyle = '#fff';
