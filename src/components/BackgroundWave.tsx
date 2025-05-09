@@ -26,7 +26,7 @@ export default function BackgroundWave() {
     if (!ctx) return;
 
     let width = window.innerWidth;
-    let height = 240; // Height of the visualizer area
+    const height = 240; // Height of the visualizer area
     canvas.width = width;
     canvas.height = height;
 
