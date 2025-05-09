@@ -53,6 +53,7 @@ export default function BackgroundWave() {
     }
 
     function draw() {
+      if (!ctx) return;
       ctx.clearRect(0, 0, width, height);
       ctx.fillStyle = '#11131a';
       ctx.fillRect(0, 0, width, height);
