@@ -7,7 +7,7 @@ const BAR_COLORS = [
   'var(--accent-1)',
   'var(--accent-2)',
 ];
-const NUM_BARS = 48;
+const NUM_BARS = 100;
 
 export default function BackgroundWave() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -15,6 +15,7 @@ export default function BackgroundWave() {
   const audioData = useRef<number[]>([]);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const animationRef = useRef<number | undefined>(undefined);
+  const mouse = useRef({ x: 0.5, y: 0.5 });
 
   // Microphone setup
   useEffect(() => {
@@ -72,6 +73,12 @@ export default function BackgroundWave() {
     };
     window.addEventListener('resize', handleResize);
 
+    const handleMouseMove = (e: MouseEvent) => {
+      mouse.current.x = e.clientX / width;
+      mouse.current.y = e.clientY / height;
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+
     let frame = 0;
     function draw() {
       if (!ctx) return;
@@ -79,20 +86,21 @@ export default function BackgroundWave() {
       const barWidth = width / NUM_BARS;
       for (let i = 0; i < NUM_BARS; i++) {
         let barHeight;
+        let distortion = Math.sin(frame * 0.04 + i * 0.2 + mouse.current.x * 5 + mouse.current.y * 5) * 40 * mouse.current.y;
         if (micMode && audioData.current.length > 0) {
           // Use audio data for bar height
           const audioIdx = Math.floor((i / NUM_BARS) * audioData.current.length);
           const audioVal = audioData.current[audioIdx] || 0;
-          barHeight = (height / 3) * (0.5 + Math.abs(audioVal));
+          barHeight = (height / 3) * (0.5 + Math.abs(audioVal)) + distortion;
         } else {
           // Animate randomly
-          barHeight = (height / 3) * (0.3 + 0.7 * Math.abs(Math.sin(frame * 0.03 + i)));
+          barHeight = (height / 3) * (0.3 + 0.7 * Math.abs(Math.sin(frame * 0.03 + i))) + distortion;
         }
         ctx.fillStyle = BAR_COLORS[i % BAR_COLORS.length];
         ctx.fillRect(
-          i * barWidth + barWidth * 0.2,
+          i * barWidth + barWidth * 0.4,
           height / 2 - barHeight / 2,
-          barWidth * 0.6,
+          barWidth * 0.2,
           barHeight
         );
       }
@@ -102,6 +110,7 @@ export default function BackgroundWave() {
     draw();
     return () => {
       window.removeEventListener('resize', handleResize);
+      window.removeEventListener('mousemove', handleMouseMove);
       if (animationRef.current) cancelAnimationFrame(animationRef.current);
     };
   }, [micMode]);
