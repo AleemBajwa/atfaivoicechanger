@@ -1,7 +1,7 @@
 "use client";
 import React, { useRef, useEffect } from 'react';
 
-const PILL_COLORS = [
+const BAR_COLORS = [
   "#6fffd6", // mint
   "#fffbe6", // off-white
   "#ffe066", // yellow
@@ -12,12 +12,24 @@ const PILL_COLORS = [
   "#f7b7a3", // peach
   "#c3f584", // light green
   "#fff",    // white
+  "#ff5e62", // coral
+  "#5ee7df", // teal
+  "#b490ca", // lavender
+  "#f9ea8f", // light yellow
+  "#f6d365", // gold
+  "#fd6e6a", // red
 ];
-const NUM_BARS = 32;
-const PILLS_PER_BAR = 12;
+const NUM_BARS = 96;
 
 export default function BackgroundWave() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  // Assign each bar a random color from the palette (stable across renders)
+  const barColorsRef = useRef<string[]>([]);
+  if (barColorsRef.current.length !== NUM_BARS) {
+    barColorsRef.current = Array.from({ length: NUM_BARS }, () =>
+      BAR_COLORS[Math.floor(Math.random() * BAR_COLORS.length)]
+    );
+  }
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -26,7 +38,7 @@ export default function BackgroundWave() {
     if (!ctx) return;
 
     let width = window.innerWidth;
-    const height = 240; // Height of the visualizer area
+    const height = 240;
     canvas.width = width;
     canvas.height = height;
 
@@ -58,36 +70,22 @@ export default function BackgroundWave() {
       ctx.fillStyle = '#11131a';
       ctx.fillRect(0, 0, width, height);
       drawGrid();
-      const barWidth = width / NUM_BARS;
-      const pillHeight = height / (PILLS_PER_BAR + 2);
+      const barWidth = Math.max(1, Math.floor(width / (NUM_BARS * 1.5)));
+      const gap = (width - NUM_BARS * barWidth) / (NUM_BARS + 1);
+      const now = Date.now();
       for (let i = 0; i < NUM_BARS; i++) {
-        // Animate: random number of active pills per bar
-        const activePills = Math.floor(
-          (Math.sin(Date.now() / 500 + i) + 1) / 2 * (PILLS_PER_BAR - 2)
-        ) + 2 + Math.floor(Math.random() * 2);
-        for (let j = 0; j < PILLS_PER_BAR; j++) {
-          const isActive = j < activePills;
-          ctx.save();
-          ctx.globalAlpha = isActive ? 1 : 0.18;
-          ctx.fillStyle = isActive
-            ? PILL_COLORS[(i * 3 + j * 7 + Math.floor(Date.now() / 200)) % PILL_COLORS.length]
-            : '#fff';
-          const x = i * barWidth + barWidth * 0.18;
-          const y = height - (j + 1) * pillHeight - 6;
-          const pillW = barWidth * 0.64;
-          const pillH = pillHeight * 0.7;
-          const radius = pillH / 2;
-          // Draw rounded pill
-          ctx.beginPath();
-          ctx.moveTo(x + radius, y);
-          ctx.lineTo(x + pillW - radius, y);
-          ctx.arc(x + pillW - radius, y + radius, radius, -Math.PI / 2, Math.PI / 2);
-          ctx.lineTo(x + radius, y + pillH);
-          ctx.arc(x + radius, y + radius, radius, Math.PI / 2, (3 * Math.PI) / 2);
-          ctx.closePath();
-          ctx.fill();
-          ctx.restore();
-        }
+        // Smooth flowing animation using sine waves
+        const phase = (i / NUM_BARS) * Math.PI * 2;
+        const t = now / 900 + phase * 1.2;
+        const amplitude = height * 0.38 + Math.sin(t) * height * 0.22;
+        const barHeight = Math.max(12, amplitude + Math.sin(t * 1.7 + i) * 18);
+        const x = gap + i * (barWidth + gap);
+        const y = height - barHeight;
+        ctx.save();
+        ctx.fillStyle = barColorsRef.current[i];
+        ctx.globalAlpha = 0.92;
+        ctx.fillRect(x, y, barWidth, barHeight);
+        ctx.restore();
       }
       requestAnimationFrame(draw);
     }
