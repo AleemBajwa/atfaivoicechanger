@@ -1,35 +1,18 @@
 "use client";
 import React, { useRef, useEffect } from 'react';
 
-const BAR_COLORS = [
-  "#6fffd6", // mint
-  "#fffbe6", // off-white
-  "#ffe066", // yellow
-  "#ffd6e0", // pink
-  "#b5aaff", // purple
-  "#aee9ff", // blue
-  "#ffb347", // orange
-  "#f7b7a3", // peach
-  "#c3f584", // light green
-  "#fff",    // white
-  "#ff5e62", // coral
-  "#5ee7df", // teal
-  "#b490ca", // lavender
-  "#f9ea8f", // light yellow
-  "#f6d365", // gold
-  "#fd6e6a", // red
+const NUM_BARS = 120;
+const GRADIENT_COLORS = [
+  { stop: 0, color: "#00c3ff" }, // blue
+  { stop: 0.25, color: "#7f5fff" }, // purple
+  { stop: 0.5, color: "#ff4ecd" }, // pink
+  { stop: 0.75, color: "#ffb347" }, // orange
+  { stop: 1, color: "#ffe066" }, // yellow
 ];
-const NUM_BARS = 96;
 
 export default function BackgroundWave() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  // Assign each bar a random color from the palette (stable across renders)
-  const barColorsRef = useRef<string[]>([]);
-  if (barColorsRef.current.length !== NUM_BARS) {
-    barColorsRef.current = Array.from({ length: NUM_BARS }, () =>
-      BAR_COLORS[Math.floor(Math.random() * BAR_COLORS.length)]
-    );
-  }
+  const rippleRef = useRef<{x: number, t: number} | null>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -38,7 +21,7 @@ export default function BackgroundWave() {
     if (!ctx) return;
 
     let width = window.innerWidth;
-    const height = 240;
+    const height = 220;
     canvas.width = width;
     canvas.height = height;
 
@@ -49,49 +32,70 @@ export default function BackgroundWave() {
     };
     window.addEventListener('resize', handleResize);
 
-    function drawGrid() {
-      if (!ctx) return;
-      ctx.save();
-      ctx.globalAlpha = 0.12;
-      ctx.strokeStyle = '#fff';
-      for (let x = 0; x < width; x += 24) {
-        for (let y = 0; y < height; y += 24) {
-          ctx.beginPath();
-          ctx.arc(x, y, 1.2, 0, 2 * Math.PI);
-          ctx.stroke();
-        }
+    // Mouse ripple effect
+    const handleMouseMove = (e: MouseEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      rippleRef.current = { x, t: Date.now() };
+    };
+    canvas.addEventListener('mousemove', handleMouseMove);
+
+    function getGradient(ctx: CanvasRenderingContext2D, width: number) {
+      const grad = ctx.createLinearGradient(0, 0, width, 0);
+      for (const stop of GRADIENT_COLORS) {
+        grad.addColorStop(stop.stop, stop.color);
       }
-      ctx.restore();
+      return grad;
     }
 
     function draw() {
       if (!ctx) return;
       ctx.clearRect(0, 0, width, height);
-      ctx.fillStyle = '#11131a';
-      ctx.fillRect(0, 0, width, height);
-      drawGrid();
-      const barWidth = Math.max(1, Math.floor(width / (NUM_BARS * 1.5)));
+      ctx.fillStyle = '#fff';
+      ctx.globalAlpha = 1;
+      // Center waveform vertically
+      const centerY = height / 2;
+      const barWidth = Math.max(1, Math.floor(width / (NUM_BARS * 1.2)));
       const gap = (width - NUM_BARS * barWidth) / (NUM_BARS + 1);
       const now = Date.now();
+      // Gradient for bars
+      ctx.save();
+      ctx.globalAlpha = 1;
+      ctx.strokeStyle = getGradient(ctx, width);
       for (let i = 0; i < NUM_BARS; i++) {
-        // Smooth flowing animation using sine waves
+        // Sine wave for smooth animation
         const phase = (i / NUM_BARS) * Math.PI * 2;
         const t = now / 900 + phase * 1.2;
-        const amplitude = height * 0.38 + Math.sin(t) * height * 0.22;
-        const barHeight = Math.max(12, amplitude + Math.sin(t * 1.7 + i) * 18);
+        let amplitude = Math.sin(t) * 48 + Math.sin(t * 0.37 + i) * 18;
+        // Ripple effect
+        if (rippleRef.current) {
+          const rippleX = rippleRef.current.x;
+          const rippleT = (now - rippleRef.current.t) / 1000;
+          const dist = Math.abs((gap + i * (barWidth + gap)) - rippleX);
+          const rippleStrength = Math.max(0, 1 - rippleT * 1.5);
+          if (rippleStrength > 0.01) {
+            amplitude += Math.sin(rippleT * 8 - dist / 32) * 32 * rippleStrength * Math.exp(-dist / 320);
+          } else {
+            rippleRef.current = null;
+          }
+        }
+        const barHeight = Math.max(8, 64 + amplitude);
         const x = gap + i * (barWidth + gap);
-        const y = height - barHeight;
-        ctx.save();
-        ctx.fillStyle = barColorsRef.current[i];
-        ctx.globalAlpha = 0.92;
-        ctx.fillRect(x, y, barWidth, barHeight);
-        ctx.restore();
+        const y = centerY - barHeight / 2;
+        ctx.beginPath();
+        ctx.moveTo(x + barWidth / 2, y);
+        ctx.lineTo(x + barWidth / 2, y + barHeight);
+        ctx.lineWidth = barWidth;
+        ctx.strokeStyle = getGradient(ctx, width);
+        ctx.stroke();
       }
+      ctx.restore();
       requestAnimationFrame(draw);
     }
     draw();
     return () => {
       window.removeEventListener('resize', handleResize);
+      canvas.removeEventListener('mousemove', handleMouseMove);
     };
   }, []);
 
@@ -99,16 +103,15 @@ export default function BackgroundWave() {
     <canvas
       ref={canvasRef}
       style={{
-        position: 'fixed',
-        left: 0,
-        right: 0,
-        bottom: 0,
+        display: 'block',
         width: '100vw',
-        height: '240px',
+        height: '220px',
+        margin: '0 auto',
+        background: 'transparent',
         zIndex: 0,
-        pointerEvents: 'none',
         opacity: 1,
         transition: 'opacity 0.3s',
+        position: 'relative',
       }}
       aria-hidden="true"
     />
