@@ -1,58 +1,23 @@
 "use client";
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect } from 'react';
 
-const BAR_COLORS = [
-  'var(--primary)',
-  'var(--primary-light)',
-  'var(--accent-1)',
-  'var(--accent-2)',
+const PILL_COLORS = [
+  "#6fffd6", // mint
+  "#fffbe6", // off-white
+  "#ffe066", // yellow
+  "#ffd6e0", // pink
+  "#b5aaff", // purple
+  "#aee9ff", // blue
+  "#ffb347", // orange
+  "#f7b7a3", // peach
+  "#c3f584", // light green
+  "#fff",    // white
 ];
-const NUM_BARS = 100;
+const NUM_BARS = 32;
+const PILLS_PER_BAR = 12;
 
 export default function BackgroundWave() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [micMode, setMicMode] = useState(false);
-  const audioData = useRef<number[]>([]);
-  const analyserRef = useRef<AnalyserNode | null>(null);
-  const animationRef = useRef<number | undefined>(undefined);
-  const mouse = useRef({ x: 0.5, y: 0.5 });
-
-  // Microphone setup
-  useEffect(() => {
-    if (!micMode) return;
-    let audioCtx: AudioContext | null = null;
-    let analyser: AnalyserNode | null = null;
-    let dataArray: Uint8Array;
-    let source: MediaStreamAudioSourceNode;
-    let stream: MediaStream;
-    let running = true;
-
-    async function setupMic() {
-      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      audioCtx = new (window.AudioContext || ((window as unknown) as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
-      analyser = audioCtx.createAnalyser();
-      analyser.fftSize = 128;
-      dataArray = new Uint8Array(analyser.frequencyBinCount);
-      source = audioCtx.createMediaStreamSource(stream);
-      source.connect(analyser);
-      analyserRef.current = analyser;
-      function getAudio() {
-        if (!running || !analyser) return;
-        analyser.getByteTimeDomainData(dataArray);
-        // Normalize and store
-        audioData.current = Array.from(dataArray).map(v => (v - 128) / 128);
-        requestAnimationFrame(getAudio);
-      }
-      getAudio();
-    }
-    setupMic();
-    return () => {
-      running = false;
-      if (audioCtx) audioCtx.close();
-      if (stream) stream.getTracks().forEach(track => track.stop());
-      analyserRef.current = null;
-    };
-  }, [micMode]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -61,89 +26,91 @@ export default function BackgroundWave() {
     if (!ctx) return;
 
     let width = window.innerWidth;
-    let height = window.innerHeight;
+    let height = 240; // Height of the visualizer area
     canvas.width = width;
     canvas.height = height;
 
     const handleResize = () => {
       width = window.innerWidth;
-      height = window.innerHeight;
       canvas.width = width;
       canvas.height = height;
     };
     window.addEventListener('resize', handleResize);
 
-    const handleMouseMove = (e: MouseEvent) => {
-      mouse.current.x = e.clientX / width;
-      mouse.current.y = e.clientY / height;
-    };
-    window.addEventListener('mousemove', handleMouseMove);
-
-    let frame = 0;
-    function draw() {
-      if (!ctx) return;
-      ctx.clearRect(0, 0, width, height);
-      const barWidth = width / NUM_BARS;
-      for (let i = 0; i < NUM_BARS; i++) {
-        let barHeight;
-        const distortion = Math.sin(frame * 0.04 + i * 0.2 + mouse.current.x * 5 + mouse.current.y * 5) * 40 * mouse.current.y;
-        if (micMode && audioData.current.length > 0) {
-          // Use audio data for bar height
-          const audioIdx = Math.floor((i / NUM_BARS) * audioData.current.length);
-          const audioVal = audioData.current[audioIdx] || 0;
-          barHeight = (height / 3) * (0.5 + Math.abs(audioVal)) + distortion;
-        } else {
-          // Animate randomly
-          barHeight = (height / 3) * (0.3 + 0.7 * Math.abs(Math.sin(frame * 0.03 + i))) + distortion;
+    function drawGrid() {
+      ctx.save();
+      ctx.globalAlpha = 0.12;
+      ctx.strokeStyle = '#fff';
+      for (let x = 0; x < width; x += 24) {
+        for (let y = 0; y < height; y += 24) {
+          ctx.beginPath();
+          ctx.arc(x, y, 1.2, 0, 2 * Math.PI);
+          ctx.stroke();
         }
-        ctx.fillStyle = BAR_COLORS[i % BAR_COLORS.length];
-        ctx.fillRect(
-          i * barWidth + barWidth * 0.4,
-          height / 2 - barHeight / 2,
-          barWidth * 0.2,
-          barHeight
-        );
       }
-      frame++;
-      animationRef.current = requestAnimationFrame(draw);
+      ctx.restore();
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, width, height);
+      ctx.fillStyle = '#11131a';
+      ctx.fillRect(0, 0, width, height);
+      drawGrid();
+      const barWidth = width / NUM_BARS;
+      const pillHeight = height / (PILLS_PER_BAR + 2);
+      for (let i = 0; i < NUM_BARS; i++) {
+        // Animate: random number of active pills per bar
+        const activePills = Math.floor(
+          (Math.sin(Date.now() / 500 + i) + 1) / 2 * (PILLS_PER_BAR - 2)
+        ) + 2 + Math.floor(Math.random() * 2);
+        for (let j = 0; j < PILLS_PER_BAR; j++) {
+          const isActive = j < activePills;
+          ctx.save();
+          ctx.globalAlpha = isActive ? 1 : 0.18;
+          ctx.fillStyle = isActive
+            ? PILL_COLORS[(i * 3 + j * 7 + Math.floor(Date.now() / 200)) % PILL_COLORS.length]
+            : '#fff';
+          const x = i * barWidth + barWidth * 0.18;
+          const y = height - (j + 1) * pillHeight - 6;
+          const pillW = barWidth * 0.64;
+          const pillH = pillHeight * 0.7;
+          const radius = pillH / 2;
+          // Draw rounded pill
+          ctx.beginPath();
+          ctx.moveTo(x + radius, y);
+          ctx.lineTo(x + pillW - radius, y);
+          ctx.arc(x + pillW - radius, y + radius, radius, -Math.PI / 2, Math.PI / 2);
+          ctx.lineTo(x + radius, y + pillH);
+          ctx.arc(x + radius, y + radius, radius, Math.PI / 2, (3 * Math.PI) / 2);
+          ctx.closePath();
+          ctx.fill();
+          ctx.restore();
+        }
+      }
+      requestAnimationFrame(draw);
     }
     draw();
     return () => {
       window.removeEventListener('resize', handleResize);
-      window.removeEventListener('mousemove', handleMouseMove);
-      if (animationRef.current) cancelAnimationFrame(animationRef.current);
     };
-  }, [micMode]);
+  }, []);
 
   return (
-    <>
-      <canvas
-        ref={canvasRef}
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100vw',
-          height: '100vh',
-          zIndex: 0,
-          pointerEvents: 'none',
-          opacity: 0.7,
-          transition: 'opacity 0.3s',
-        }}
-        aria-hidden="true"
-      />
-      <button
-        onClick={() => setMicMode(m => !m)}
-        className="fixed bottom-6 right-6 z-50 px-5 py-3 rounded-full shadow-lg font-bold text-lg hover:scale-105 hover:shadow-xl transition-all duration-200 focus:outline-none focus:ring-2 backdrop-blur-lg"
-        style={{
-          pointerEvents: 'auto',
-          background: 'linear-gradient(90deg, var(--primary), var(--primary-light))',
-          color: '#fff',
-        }}
-        aria-pressed={micMode ? 'true' : 'false'}
-      >
-        {micMode ? '🎤 Live Bars On' : '🎤 Live Bars Off'}
-      </button>
-    </>
+    <canvas
+      ref={canvasRef}
+      style={{
+        position: 'fixed',
+        left: 0,
+        right: 0,
+        bottom: 0,
+        width: '100vw',
+        height: '240px',
+        zIndex: 0,
+        pointerEvents: 'none',
+        opacity: 1,
+        transition: 'opacity 0.3s',
+      }}
+      aria-hidden="true"
+    />
   );
 } 
