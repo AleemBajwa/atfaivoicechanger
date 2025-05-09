@@ -45,17 +45,18 @@ export function TopBar() {
   }, [session]);
 
   return (
-    <header className="w-full flex flex-col sm:flex-row items-center justify-between px-4 sm:px-8 py-4 border-b border-purple-900/40 bg-black/60 backdrop-blur-lg z-20 sticky top-0 shadow-lg">
+    <header className="w-full flex flex-col sm:flex-row items-center justify-between px-4 sm:px-8 py-4 border-b" style={{ background: 'var(--primary)', color: '#fff', borderColor: 'var(--primary-dark)' }}>
       <div className="flex items-center gap-4">
-        <span className="font-extrabold text-3xl tracking-tight bg-gradient-to-r from-[#a78bfa] to-[#f472b6] bg-clip-text text-transparent drop-shadow-lg select-none">AlChemist Voice Changer</span>
+        <span className="font-extrabold text-3xl tracking-tight" style={{ background: 'none', color: '#fff', textShadow: '0 2px 2px rgba(0,0,0,0.10)' }}>AlChemist Voice Changer</span>
       </div>
       <div className="flex items-center gap-6">
         {/* Credit Balance */}
-        <span className="text-sm text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-900 px-3 py-1 rounded-full">
+        <span className="text-sm px-3 py-1 rounded-full" style={{ background: 'var(--gray-100)', color: 'var(--primary)', fontWeight: 600 }}>
           Credits: {loadingCredits ? '...' : credits !== null ? credits : '--'}
         </span>
         <button
-          className="ml-2 bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded transition text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+          className="ml-2 px-3 py-1 rounded transition text-sm focus:outline-none focus:ring-2"
+          style={{ background: 'var(--primary-light)', color: '#fff', border: 'none', boxShadow: 'var(--shadow-card)', fontWeight: 600 }}
           onClick={async () => {
             const stripe = await stripePromise;
             const res = await fetch("/api/create-checkout-session", { method: "POST" });
@@ -69,14 +70,15 @@ export function TopBar() {
         {/* User Profile or Auth */}
         {session ? (
           <div className="flex items-center gap-3">
-            <span className="text-gray-700 dark:text-gray-200 text-sm">{session.user.email}</span>
+            <span className="text-sm" style={{ color: '#fff' }}>{session.user.email}</span>
             <button
-              className="bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 px-3 py-1 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition"
+              className="px-3 py-1 rounded transition"
+              style={{ background: 'var(--gray-100)', color: 'var(--primary)', fontWeight: 600 }}
               onClick={async () => { await supabase.auth.signOut(); }}
             >Sign Out</button>
           </div>
         ) : (
-          <div className="w-8 h-8 rounded-full bg-gray-300 dark:bg-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-300 font-bold">U</div>
+          <div className="w-8 h-8 rounded-full flex items-center justify-center font-bold" style={{ background: 'var(--gray-100)', color: 'var(--primary)' }}>U</div>
         )}
       </div>
     </header>

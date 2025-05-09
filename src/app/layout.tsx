@@ -24,14 +24,16 @@ export default function RootLayout({
   const [historyModalOpen, setHistoryModalOpen] = useState(false);
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}> 
-      <body className="relative min-h-screen bg-gradient-to-br from-[#2d0036] via-[#6a1bc2] to-[#fc5c7d] text-white font-sans">
-        <HistoryModalContext.Provider value={{ open: historyModalOpen, setOpen: setHistoryModalOpen }}>
-          <BackgroundWave />
-          <TopBar />
-          <div className="relative z-10">
-            {children}
-          </div>
-        </HistoryModalContext.Provider>
+      <body style={{ background: 'var(--background)', color: 'var(--foreground)', fontFamily: 'var(--font-family)' }}>
+        <div className="container" style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 1.5rem' }}>
+          <HistoryModalContext.Provider value={{ open: historyModalOpen, setOpen: setHistoryModalOpen }}>
+            <BackgroundWave />
+            <TopBar />
+            <div className="relative z-10">
+              {children}
+            </div>
+          </HistoryModalContext.Provider>
+        </div>
       </body>
     </html>
   );
