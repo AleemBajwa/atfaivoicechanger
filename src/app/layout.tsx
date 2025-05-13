@@ -30,7 +30,7 @@ export default function RootLayout({
             <BackgroundWave />
             <TopBar />
             <div className="relative z-10">
-              {children}
+        {children}
             </div>
           </HistoryModalContext.Provider>
         </div>

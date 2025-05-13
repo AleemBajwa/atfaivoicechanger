@@ -1,12 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { supabase } from '../../../lib/supabaseClient';
+import { createClient } from '@supabase/supabase-js';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
 export async function POST(req: NextRequest) {
   const sig = req.headers.get('stripe-signature');
   const body = await req.text();
+
   let event;
   try {
     event = stripe.webhooks.constructEvent(
@@ -14,24 +17,48 @@ export async function POST(req: NextRequest) {
       sig!,
       process.env.STRIPE_WEBHOOK_SECRET!
     );
-  } catch {
-    return NextResponse.json({ error: 'Webhook signature verification failed.' }, { status: 400 });
+  } catch (err) {
+    return NextResponse.json({ error: 'Webhook signature verification failed' }, { status: 400 });
   }
 
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object as Stripe.Checkout.Session;
-    // In a real implementation, you would pass the user_id in the session metadata
-    // For demo, you may need to look up the user by email or another identifier
-    // Here, we assume the email is available
-    const email = session.customer_details?.email;
-    if (email) {
-      // Find user by email
-      const { data: user } = await supabase.from('users').select('id').eq('email', email).single();
-      if (user) {
-        // Add 500 credits
-        await supabase.rpc('increment_credits', { user_id: user.id, amount: 500 });
+    const userId = session.metadata?.userId;
+    
+    if (!userId) {
+      console.error('No user ID in session metadata');
+      return NextResponse.json({ error: 'No user ID in session metadata' }, { status: 400 });
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseAnonKey);
+    
+    try {
+      // Increment credits for the user
+      const { error } = await supabase.rpc('increment_credits', {
+        user_id: userId,
+        amount: 500 // 500 credits per purchase
+      });
+
+      if (error) {
+        console.error('Error incrementing credits:', error);
+        return NextResponse.json({ error: 'Failed to increment credits' }, { status: 500 });
       }
+
+      // Log the successful purchase
+      await supabase.from('purchases').insert({
+        user_id: userId,
+        amount: 500,
+        credits: 500,
+        stripe_session_id: session.id,
+        status: 'completed'
+      });
+
+      return NextResponse.json({ success: true });
+    } catch (error) {
+      console.error('Error processing webhook:', error);
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
   }
+
   return NextResponse.json({ received: true });
 } 
